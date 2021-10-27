@@ -6,8 +6,8 @@ import loginService from './services/loginService'
 import LoginForm from './components/LoginForm'
 import PostForm from './components/PostForm'
 import { SuccessNotification, ErrorNotification, } from './components/Notification'
-import Togglable from './components/Togglable';
-import axios from 'axios';
+import Togglable from './components/Togglable'
+import axios from 'axios'
 
 const App = () => {
   const [user, setUser] = useState(null)
@@ -35,45 +35,31 @@ const App = () => {
           isOwner: (user.username === post.user.username)
         }
       })
-      console.log(postsWithOwnership);
       setPosts(postsWithOwnership)
     }
   }, [user, postLiked, postDeleted])
 
   useEffect(() => {
     blogService
-    .getAll().then(initialPosts => {
+      .getAll().then(initialPosts => {
       // Sort posts by most likes
-      initialPosts.sort((a, b) => {
-        return b.likes - a.likes
-      }).map(post => {
-        if (user !== null) {
-          post.isOwner = (user.username === post.user.username)
-        }
+        initialPosts.sort((a, b) => {
+          return b.likes - a.likes
+        }).map(post => {
+          if (user !== null) {
+            post.isOwner = (user.username === post.user.username)
+          }
+        })
+        setPosts(initialPosts)
       })
-
-      setPosts(initialPosts)
-    })
     setPostDeleted(false)
     setPostLiked(false)
   }, [postDeleted, postLiked])
 
 
-  if (user !== null) {
-    const postsWithOwnership = posts.map(post => {
-      return {
-        ...post,
-        isOwner: (user.username === post.user.username)
-      }
-    })
-    console.log(postsWithOwnership);
-    //setPosts(postsWithOwnership)
-  }
-
-
   const showMessage = ( newMessage, type ) => {
     type === 'success' ? setSuccessMessage( newMessage ) : setErrorMessage(
-        newMessage )
+      newMessage )
     setTimeout( () => {
       setErrorMessage( null )
       setSuccessMessage( null )
@@ -81,12 +67,12 @@ const App = () => {
   }
 
   const addPost = async (newPost) => {
-    console.log('addPost called');
+    console.log('addPost called')
     postFormRef.current.toggleVisibility()
 
     try {
       const postCreated = await blogService.create(newPost)
-      console.log('postCreated: ', postCreated);
+      console.log('postCreated: ', postCreated)
       showMessage(`a new blog ${postCreated.title} by ${postCreated.author} added`, 'success')
       setPosts(posts.concat(postCreated))
     } catch ( exception ) {
@@ -96,24 +82,23 @@ const App = () => {
 
   const likePost = async (postId, currentLikes) => {
     const likeIncremented = currentLikes + 1
-    await axios.put(`/api/posts/${postId}`, {likes: likeIncremented})
+    await axios.put(`/api/posts/${postId}`, { likes: likeIncremented })
     setPostLiked(true)
   }
 
-  const deletePost = async (postId, postTitle, postAuthor) => {
+  const deletePost = async (postId) => {
     const token = user.token
     const config = {
       headers: { Authorization: `Bearer ${token}` }
     }
-      try {
-        await axios.delete(`api/posts/${postId}`, config)
-        showMessage('Post successfully deleted!', 'success')
-        setPostDeleted(true)
-      } catch (exception) {
-        showMessage('Post deletion failed!', 'error')
-      }
+    try {
+      await axios.delete(`api/posts/${postId}`, config)
+      showMessage('Post successfully deleted!', 'success')
+      setPostDeleted(true)
+    } catch (exception) {
+      showMessage('Post deletion failed!', 'error')
+    }
   }
-
 
   const handleLogout = () => {
     window.localStorage.clear()
@@ -128,7 +113,7 @@ const App = () => {
         username, password,
       })
       window.localStorage.setItem(
-          'loggedBlogappUser', JSON.stringify(user)
+        'loggedBlogappUser', JSON.stringify(user)
       )
       blogService.setToken(user.token)
       setUser(user)
@@ -139,61 +124,59 @@ const App = () => {
 
   const loginForm = () => {
     return (
-        <Togglable buttonLabel={'Login'}>
-          <LoginForm
-              handleLogin={handleLogin}
-          />
-        </Togglable>
+      <Togglable buttonLabel={'Login'}>
+        <LoginForm
+          handleLogin={handleLogin}
+        />
+      </Togglable>
     )
   }
 
 
   const postForm = () => {
     return (
-        <Togglable buttonLabel={'Create new post'} ref={postFormRef}>
-          <PostForm
-              createPost={addPost}
-              token={user.token}
-          />
-        </Togglable>
+      <Togglable buttonLabel={'Create new post'} ref={postFormRef}>
+        <PostForm
+          createPost={addPost}
+          token={user.token}
+        />
+      </Togglable>
     )
   }
 
 
   const notificationContent = successMessage
-      ? <SuccessNotification message={successMessage} />
-      : <ErrorNotification message={errorMessage} />
+    ? <SuccessNotification message={successMessage} />
+    : <ErrorNotification message={errorMessage} />
 
   return (
-      <div>
-        { notificationContent }
+    <div>
+      { notificationContent }
 
-        {user === null ?
-            loginForm()
-             :
-            <div>
-              <p>{user.username} logged in <button onClick={handleLogout}>Logout</button></p>
+      {user === null ?
+        loginForm()
+        :
+        <div>
+          <p>{user.username} logged in <button onClick={handleLogout}>Logout</button></p>
 
-              {postForm()}
+          {postForm()}
 
-              <div>
-                <h2>Blog posts</h2>
-                <ul style={ulStyle}>
-                  {posts.map(post =>
-                      <Post key={post.id}
-                            useername={user.username}
-                            post={post}
-                            deletePost={deletePost}
-                            likePost={likePost} />
-                  )}
-                </ul>
-              </div>
+          <div>
+            <h2>Blog posts</h2>
+            <ul style={ulStyle}>
+              {posts.map(post =>
+                <Post key={post.id}
+                  post={post}
+                  deletePost={deletePost}
+                  likePost={likePost} />
+              )}
+            </ul>
+          </div>
 
-            </div>
-        }
-
-        <Footer />
-      </div>
+        </div>
+      }
+      <Footer />
+    </div>
   )
 }
 
