@@ -15,7 +15,7 @@ const PostForm = ({ createPost }) => {
   }
   const handleAuthorChange = event => {
     // eslint-disable-next-line no-undef
-    etNewAuthor(event.target.value)
+    setNewAuthor(event.target.value)
     setNewPost({ ...newPost, author: event.target.value })
   }
 
