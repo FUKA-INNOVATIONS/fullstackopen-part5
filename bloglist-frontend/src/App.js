@@ -10,26 +10,13 @@ import Togglable from './components/Togglable';
 import axios from 'axios';
 
 const App = () => {
+  const [user, setUser] = useState(null)
   const [posts, setPosts] = useState([])
   const [successMessage, setSuccessMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [user, setUser] = useState(null)
   const postFormRef = useRef()
   const [postDeleted, setPostDeleted] = useState(false)
   const [postLiked, setPostLiked] = useState(false)
-
-  useEffect(() => {
-    blogService
-    .getAll().then(initialPosts => {
-      // Sort posts by most likes
-      initialPosts.sort((a, b) => {
-        return b.likes - a.likes
-      })
-      setPosts(initialPosts)
-    })
-    setPostDeleted(false)
-    setPostLiked(false)
-  }, [postDeleted, postLiked])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -39,6 +26,50 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
+  useEffect(() => {
+    if (user !== null) {
+      const postsWithOwnership = posts.map(post => {
+        return {
+          ...post,
+          isOwner: (user.username === post.user.username)
+        }
+      })
+      console.log(postsWithOwnership);
+      setPosts(postsWithOwnership)
+    }
+  }, [user, postLiked, postDeleted])
+
+  useEffect(() => {
+    blogService
+    .getAll().then(initialPosts => {
+      // Sort posts by most likes
+      initialPosts.sort((a, b) => {
+        return b.likes - a.likes
+      }).map(post => {
+        if (user !== null) {
+          post.isOwner = (user.username === post.user.username)
+        }
+      })
+
+      setPosts(initialPosts)
+    })
+    setPostDeleted(false)
+    setPostLiked(false)
+  }, [postDeleted, postLiked])
+
+
+  if (user !== null) {
+    const postsWithOwnership = posts.map(post => {
+      return {
+        ...post,
+        isOwner: (user.username === post.user.username)
+      }
+    })
+    console.log(postsWithOwnership);
+    //setPosts(postsWithOwnership)
+  }
+
 
   const showMessage = ( newMessage, type ) => {
     type === 'success' ? setSuccessMessage( newMessage ) : setErrorMessage(
@@ -150,6 +181,7 @@ const App = () => {
                 <ul style={ulStyle}>
                   {posts.map(post =>
                       <Post key={post.id}
+                            useername={user.username}
                             post={post}
                             deletePost={deletePost}
                             likePost={likePost} />

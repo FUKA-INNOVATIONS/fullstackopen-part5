@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Post = ( { post, deletePost, likePost } ) => {
+const Post = ( { username, post, deletePost, likePost } ) => {
     const [visible, setVisible] = useState(false)
     const showWhenVisible = { display: visible ? '' : 'none' }
 
@@ -53,9 +53,8 @@ const Post = ( { post, deletePost, likePost } ) => {
                     <button style={marginLeft} onClick={() => handleLike(post.id, post.likes)}>Like</button>
                 </p>
                 <p>Author: { post.author }</p>
-                <button onClick={() => handleDelete(post.id)}>Remove</button>
+                {post.isOwner && <button onClick={() => handleDelete(post.id)}>Remove</button>}
             </div>
-
         </li>
     )
 }
