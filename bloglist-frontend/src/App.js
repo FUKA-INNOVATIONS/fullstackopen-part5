@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Post from './components/Post'
 import blogService from './services/blogService'
 import Footer from './components/Footer'
@@ -6,25 +6,30 @@ import loginService from './services/loginService'
 import LoginForm from './components/LoginForm'
 import PostForm from './components/PostForm'
 import { SuccessNotification, ErrorNotification, } from './components/Notification'
+import Togglable from './components/Togglable';
+import axios from 'axios';
 
 const App = () => {
   const [posts, setPosts] = useState([])
-  const [titleInput, setTitleInput] = useState('')
-  const [authorInput, setAuthorInput] = useState('')
-  const [urlInput, setUrlInput] = useState('')
-  const [newPost, setNewPost] = useState({})
   const [successMessage, setSuccessMessage] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const postFormRef = useRef()
+  const [postDeleted, setPostDeleted] = useState(false)
+  const [postLiked, setPostLiked] = useState(false)
 
   useEffect(() => {
     blogService
     .getAll().then(initialPosts => {
+      // Sort posts by most likes
+      initialPosts.sort((a, b) => {
+        return b.likes - a.likes
+      })
       setPosts(initialPosts)
     })
-  }, [])
+    setPostDeleted(false)
+    setPostLiked(false)
+  }, [postDeleted, postLiked])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -44,47 +49,47 @@ const App = () => {
     }, 5000 )
   }
 
-  const addPost = async (event) => {
-    event.preventDefault()
+  const addPost = async (newPost) => {
     console.log('addPost called');
-
-    const postObject = newPost
+    postFormRef.current.toggleVisibility()
 
     try {
-      const postCreated = await blogService.create(postObject)
+      const postCreated = await blogService.create(newPost)
       console.log('postCreated: ', postCreated);
       showMessage(`a new blog ${postCreated.title} by ${postCreated.author} added`, 'success')
       setPosts(posts.concat(postCreated))
-      setTitleInput(''); setAuthorInput(''); setUrlInput('')
-      setNewPost({})
     } catch ( exception ) {
       showMessage('Creation of new blog post failed!', 'error')
     }
-
   }
 
-  const handleTitleChange = (event) => {
-    setTitleInput(event.target.value)
-    setNewPost({...newPost, title: event.target.value})
+  const likePost = async (postId, currentLikes) => {
+    const likeIncremented = currentLikes + 1
+    await axios.put(`/api/posts/${postId}`, {likes: likeIncremented})
+    setPostLiked(true)
   }
 
-  const handleAuthorChange = event => {
-    setAuthorInput(event.target.value)
-    setNewPost({...newPost, author: event.target.value})
+  const deletePost = async (postId, postTitle, postAuthor) => {
+    const token = user.token
+    const config = {
+      headers: { Authorization: `Bearer ${token}` }
+    }
+      try {
+        await axios.delete(`api/posts/${postId}`, config)
+        showMessage('Post successfully deleted!', 'success')
+        setPostDeleted(true)
+      } catch (exception) {
+        showMessage('Post deletion failed!', 'error')
+      }
   }
 
-  const handleUrlChange = event => {
-    setUrlInput(event.target.value)
-    setNewPost({...newPost, url: event.target.value})
-  }
 
   const handleLogout = () => {
     window.localStorage.clear()
     setUser(null)
   }
 
-  const handleLogin = async (event) => {
-    event.preventDefault()
+  const handleLogin = async (username, password) => {
     console.log('logging in with', username, password)
 
     try {
@@ -96,12 +101,33 @@ const App = () => {
       )
       blogService.setToken(user.token)
       setUser(user)
-      setUsername('')
-      setPassword('')
     } catch (exception) {
       showMessage('Login failed!', 'error')
     }
   }
+
+  const loginForm = () => {
+    return (
+        <Togglable buttonLabel={'Login'}>
+          <LoginForm
+              handleLogin={handleLogin}
+          />
+        </Togglable>
+    )
+  }
+
+
+  const postForm = () => {
+    return (
+        <Togglable buttonLabel={'Create new post'} ref={postFormRef}>
+          <PostForm
+              createPost={addPost}
+              token={user.token}
+          />
+        </Togglable>
+    )
+  }
+
 
   const notificationContent = successMessage
       ? <SuccessNotification message={successMessage} />
@@ -109,34 +135,24 @@ const App = () => {
 
   return (
       <div>
-
         { notificationContent }
 
         {user === null ?
-            <LoginForm
-                username={username}
-                password={password}
-                setUsername={setUsername}
-                setPassword={setPassword}
-                handleLogin={handleLogin}
-            /> :
+            loginForm()
+             :
             <div>
               <p>{user.username} logged in <button onClick={handleLogout}>Logout</button></p>
-              <PostForm
-                  titleInput={titleInput}
-                  authorInput={authorInput}
-                  urlInput={urlInput}
-                  handleTitleChange={handleTitleChange}
-                  handleAuthorChange={handleAuthorChange}
-                  handleUrlChange={handleUrlChange}
-                  addPost={addPost}
-              />
 
-              <div className={'blog-posts'}>
+              {postForm()}
+
+              <div>
                 <h2>Blog posts</h2>
-                <ul>
+                <ul style={ulStyle}>
                   {posts.map(post =>
-                      <Post key={post.id} post={post} />
+                      <Post key={post.id}
+                            post={post}
+                            deletePost={deletePost}
+                            likePost={likePost} />
                   )}
                 </ul>
               </div>
@@ -148,5 +164,10 @@ const App = () => {
       </div>
   )
 }
+
+const ulStyle = {
+  listStyleType: 'none',
+}
+
 
 export default App

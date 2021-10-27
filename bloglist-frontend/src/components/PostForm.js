@@ -1,27 +1,57 @@
-const PostForm = ({ titleInput, authorInput, urlInput, handleTitleChange, handleAuthorChange, handleUrlChange, addPost }) => {
-  return (
+import React, { useState } from 'react'
+
+const PostForm = ({ createPost }) => {
+      const [newTitle, setNewTitle] = useState('')
+      const [newAuthor, setNewAuthor] = useState('')
+      const [newUrl, setNewUrl] = useState('')
+      const [newPost, setNewPost] = useState({})
+
+
+      const handleTitleChange = (event) => {
+            setNewTitle(event.target.value)
+            setNewPost({...newPost, title: event.target.value})
+      }
+
+      const handleAuthorChange = event => {
+            setNewAuthor(event.target.value)
+            setNewPost({...newPost, author: event.target.value})
+      }
+
+      const handleUrlChange = event => {
+            setNewUrl(event.target.value)
+            setNewPost({...newPost, url: event.target.value})
+      }
+
+      const addPost = (event) => {
+        event.preventDefault()
+        createPost(newPost)
+        setNewTitle(''); setNewAuthor(''); setNewUrl('')
+        setNewPost({})
+      }
+
+      return (
       <form onSubmit={addPost}>
         <label htmlFor="title">Title:</label><br />
         <input
             type={'text'}
-            onChange={(event) => handleTitleChange(event)}
-            value={titleInput}
+            onChange={handleTitleChange}
+            value={newTitle}
         />
         <br />
 
         <label htmlFor="author">Author:</label><br />
         <input
             type={'text'}
-            onChange={(event) => handleAuthorChange(event)}
-            value={ authorInput }
+            onChange={handleAuthorChange}
+            value={ newAuthor }
         />
         <br />
 
         <label htmlFor="url">Url:</label><br />
         <input
             type={'text'}
-            onChange={(event) => handleUrlChange(event)}
-            value={ urlInput }
+            onChange={handleUrlChange}
+            value={ newUrl }
         />
         <br />
 
