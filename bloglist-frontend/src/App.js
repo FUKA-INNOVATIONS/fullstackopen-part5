@@ -17,6 +17,7 @@ const App = () => {
   const postFormRef = useRef()
   const [postDeleted, setPostDeleted] = useState(false)
   const [postLiked, setPostLiked] = useState(false)
+  const [postsUpdated, setPostsUpdated] = useState(false)
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
@@ -27,7 +28,7 @@ const App = () => {
     }
   }, [])
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (user !== null) {
       const postsWithOwnership = posts.map(post => {
         return {
@@ -37,7 +38,7 @@ const App = () => {
       })
       setPosts(postsWithOwnership)
     }
-  }, [user, postLiked, postDeleted])
+  }, [user, postLiked, postDeleted])*/
 
   useEffect(() => {
     blogService
@@ -54,7 +55,8 @@ const App = () => {
       })
     setPostDeleted(false)
     setPostLiked(false)
-  }, [postDeleted, postLiked])
+    setPostsUpdated(false)
+  }, [postDeleted, postLiked, postsUpdated, user])
 
 
   const showMessage = ( newMessage, type ) => {
@@ -75,6 +77,7 @@ const App = () => {
       console.log('postCreated: ', postCreated)
       showMessage(`a new blog ${postCreated.title} by ${postCreated.author} added`, 'success')
       setPosts(posts.concat(postCreated))
+      setPostsUpdated(true)
     } catch ( exception ) {
       showMessage('Creation of new blog post failed!', 'error')
     }
