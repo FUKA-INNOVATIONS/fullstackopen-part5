@@ -24,19 +24,19 @@ const Post = ( { post, deletePost, likePost } ) => {
 
   return (
 
-    <li key={ post.id }>
-      <p onClick={toggleVisibility} style={postTitle}>
+    <li className={'post'} key={ post.id }>
+      <p className={'post-title'} onClick={toggleVisibility} style={postTitle}>
         { post.title } <em>by</em> { post.author }
         <button style={marginLeft} onClick={toggleVisibility}>{visible ? 'Hide' : 'View'}</button>
       </p>
 
 
-      <div style={{ ...showWhenVisible, ...listStyle }}>
-        <p>Url: { post.url }</p>
-        <p>Likes: { post.likes }
+      <div className={'post-details'} style={{ ...showWhenVisible, ...listStyle }}>
+        <p className={'post-url'}>Url: { post.url }</p>
+        <p className={'post-likes'}>Likes: { post.likes }
           <button style={marginLeft} onClick={() => handleLike(post.id, post.likes)}>Like</button>
         </p>
-        <p>Author: { post.author }</p>
+        <p className={'post-author'}>Author: { post.author }</p>
         {post.isOwner && <button onClick={() => handleDelete(post.id)}>Remove</button>}
       </div>
     </li>
