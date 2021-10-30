@@ -3,7 +3,7 @@ import Proptypes from 'prop-types'
 
 const Post = ( { post, deletePost, likePost } ) => {
   const [visible, setVisible] = useState(false)
-  const showWhenVisible = { display: visible ? '' : 'none' }
+  const showWhenVisible = { display: visible ? 'block' : 'none' }
 
   const toggleVisibility = () => {
     setVisible(!visible)
@@ -27,7 +27,7 @@ const Post = ( { post, deletePost, likePost } ) => {
     <li className={'post'} key={ post.id }>
       <p className={'post-title'} onClick={toggleVisibility} style={postTitle}>
         { post.title } <em>by</em> { post.author }
-        <button style={marginLeft} onClick={toggleVisibility}>{visible ? 'Hide' : 'View'}</button>
+        <button id={visible ? 'hideDetailsBtn' : 'showDetailsBtn'} style={marginLeft} onClick={toggleVisibility}>{visible ? 'Hide' : 'View'}</button>
       </p>
 
 
