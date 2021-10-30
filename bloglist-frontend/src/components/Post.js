@@ -34,10 +34,10 @@ const Post = ( { post, deletePost, likePost } ) => {
       <div className={'post-details'} style={{ ...showWhenVisible, ...listStyle }}>
         <p className={'post-url'}>Url: { post.url }</p>
         <p className={'post-likes'}>Likes: { post.likes }
-          <button style={marginLeft} onClick={() => handleLike(post.id, post.likes)}>Like</button>
+          <button id={'likeBtn'} style={marginLeft} onClick={() => handleLike(post.id, post.likes)}>Like</button>
         </p>
         <p className={'post-author'}>Author: { post.author }</p>
-        {post.isOwner && <button onClick={() => handleDelete(post.id)}>Remove</button>}
+        {post.isOwner && <button id={'deleteBtn'} onClick={() => handleDelete(post.id)}>Remove</button>}
       </div>
     </li>
   )
