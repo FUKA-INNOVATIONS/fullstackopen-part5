@@ -5,7 +5,7 @@ const ErrorNotification = ( { message } ) => {
 
   return (
   // eslint-disable-next-line react/react-in-jsx-scope
-    <div style={ errorStyle }>
+    <div className={'notification'} style={ errorStyle }>
       { message }
     </div>
   )

@@ -35,6 +35,7 @@ const PostForm = ({ createPost }) => {
     <form onSubmit={addPost}>
       <label htmlFor="title">Title:</label><br />
       <input
+        id={'titleInput'}
         type={'text'}
         onChange={handleTitleChange}
         value={newTitle}
@@ -43,6 +44,7 @@ const PostForm = ({ createPost }) => {
 
       <label htmlFor="author">Author:</label><br />
       <input
+        id={'authorInput'}
         type={'text'}
         onChange={handleAuthorChange}
         value={ newAuthor }
@@ -51,13 +53,14 @@ const PostForm = ({ createPost }) => {
 
       <label htmlFor="url">Url:</label><br />
       <input
+        id={'urlInput'}
         type={'text'}
         onChange={handleUrlChange}
         value={ newUrl }
       />
       <br />
 
-      <button type="submit">save</button>
+      <button id={'savePost'} type="submit">save</button>
     </form>
   )
 }

@@ -5,7 +5,7 @@ import { render, fireEvent } from '@testing-library/react'
 import { prettyDOM } from '@testing-library/dom'
 import Post from './Post'
 
-test('renders post title and author name in header title', () => {
+test('only post title and author name are rendered in post header', () => {
   const post = {
     title: 'Dummy post title for testing',
     author: 'Dummy author',
